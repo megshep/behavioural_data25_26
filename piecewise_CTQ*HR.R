@@ -62,14 +62,11 @@ df$phase <- factor(df$phase, levels = c("baseline", "anticipation", "TSST", "rec
 #we are only constructing 3 as BL is the reference point
 #these basically say 'how far into this phase is this datapoint', to allow 
 #the code to recognise how each timepoint contributes to each phase
-df$anticipation <- ifelse(df$time ==2,1, ifelse(df$time == 3,2,0))
-df$tsst <- ifelse(df$time >=4 & df$time <=7, df$time - 3,0)
-df$recovery <- ifelse(df$time == 8,1,0)
+df$anticipation <- pmin(pmax(df$time - 1, 0), 2)
+df$tsst <- pmin(pmax(df$time - 3,0),4)
+df$recovery <- pmax(df$time - 7, 0)
 
 #now we can FINALLY run the pure piecewise model 
-model3 <- lmer(heart_rate ~ anticipation +tsst+recovery + (1|Subject_ID), data=df)
-summary(model3)
-
 #this is now looking at whether CTQ influences any phase of the stress response
 
 df$CTQ_c <- scale(df$CTQ_Total, scale = FALSE)
