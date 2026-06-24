@@ -13,12 +13,11 @@ summary(model1)
 #now I want to see if there are differences in the phases (anticipatory stress, reactivity, pre/post task, recovery)
 #split the dataset into separate groups for each timepoint
 #calculates what a typical participant looks like at each mmoment during the task
-#this is what we use to visualise the typical HR response
-df_summary <- df %>% group_by(time) %>% 
-  summarise(mean_hr = mean(heart_rate, na.rm = TRUE),
-            se = sd(heart_rate, na.rm = TRUE)/sqrt(n()))
+#this is what we use to visualise the typical HR response and separate it into two separate conditios=ns
+df_summary <- df %>% group_by(Condition_S1C2, time) %>%
+  summarise(mean_hr = mean(heart_rate, na.rm = TRUE), se = sd(heart_rate, na.rm = TRUE)/sqrt(n()),.groups = "drop")
 
-#one way to visualise this
+#one way to visualise this (irrespective of conditions, just overall)
 ggplot(df_summary, aes(x = time, y = mean_hr, group = 1)) +
   geom_line() +
   geom_point() +
@@ -42,8 +41,33 @@ ggplot(df, aes(x = phase, y = heart_rate)) +
   stat_summary(fun = mean, geom = "point") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+#now to visualise both trajectories separate
+ggplot(df_summary,aes(x = time, y = mean_hr,
+           group = Condition_S1C2)) +
+  geom_line() +
+  geom_point() + facet_wrap(~Condition_S1C2) +
+  labs(x = "Time point", y = "Heart rate",
+    title = "Heart rate trajectories by stress condition") +
+  theme_classic()
+
+#the more detailed overlayed graph with labels:
+ggplot(df,aes(x = phase, y = heart_rate,
+           colour = Condition_S1C2,
+           group = Condition_S1C2)) + stat_summary(fun = mean,
+               geom = "line",
+               linewidth = 1) + stat_summary(fun = mean,
+               geom = "point",
+               size = 2) +
+  theme_minimal() + theme(axis.text.x = element_text(angle = 45,
+                                   hjust = 1)) +
+  labs(x = "Phase",
+       y = "Heart rate",
+       colour = "Condition",
+       title = "Heart rate trajectories by stress condition")
  
-#so now I need to see does heart rate change across the measurement points?
+#so now I need to see does heart rate change across the measurement points, irrespective of condition?
 model2 <- lmer(heart_rate ~ time + (1 | Subject_ID), data = df)
 summary(model2)
 
@@ -66,10 +90,18 @@ df$anticipation <- pmin(pmax(df$time - 1, 0), 2)
 df$tsst <- pmin(pmax(df$time - 3,0),4)
 df$recovery <- pmax(df$time - 7, 0)
 
+#but so far we've ignored the fact we have a high and low stress condition!
+#so first i want to check whether condition influenced the trajectory
+condition <- df$Condition_S1C2
+model3_con <- lmer(heart_rate ~ (anticipation + tsst + recovery)*condition + (1|Subject_ID), data=df)
+summary(model3_con)
+
 #now we can FINALLY run the pure piecewise model 
-#this is now looking at whether CTQ influences any phase of the stress response
-
+#this is now looking at whether CTQ influences any phase of the stress response (irrespective of condition)
 df$CTQ_c <- scale(df$CTQ_Total, scale = FALSE)
+model4_CTQ_c <- lmer(heart_rate ~ (anticipation +tsst+recovery)*CTQ_c + (1|Subject_ID), data=df)
+summary(model4_CTQ_c)
 
-model3_CTQ_c <- lmer(heart_rate ~ (anticipation +tsst+recovery)*CTQ_c + (1|Subject_ID), data=df)
-summary(model3_CTQ_c)
+#now lets see if the CTQ influences any of the phases of the stress response and whether this differs by high and low stress conditions
+model5_CTQ_c <- lmer(heart_rate ~ (anticipation + tsst + recovery)*condition*CTQ_c + (1|Subject_ID),data = df)
+summary(model5_CTQ_c)
