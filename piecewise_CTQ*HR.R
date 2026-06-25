@@ -105,3 +105,40 @@ summary(model4_CTQ_c)
 #now lets see if the CTQ influences any of the phases of the stress response and whether this differs by high and low stress conditions
 model5_CTQ_c <- lmer(heart_rate ~ (anticipation + tsst + recovery)*condition*CTQ_c + (1|Subject_ID),data = df)
 summary(model5_CTQ_c)
+
+#ok now we want to see if any of the subscales impact the stress response at all
+ea <- df$emotional_abuse
+EA_model1 <- lmer(heart_rate ~ (anticipation + tsst + recovery)*ea + (1|Subject_ID), data=df)
+summary(EA_model1)
+
+EA_model2 <- lmer(heart_rate ~ (anticipation + tsst + recovery)*ea*condition + (1|Subject_ID), data=df)
+summary(EA_model2)
+
+en <- df$emotional_neglect
+EN_model1 <- lmer(heart_rate ~ (anticipation + tsst + recovery)*en + (1|Subject_ID), data=df)
+summary(EA_model1)
+
+EN_model2 <- lmer(heart_rate ~ (anticipation + tsst + recovery)*en*condition + (1|Subject_ID), data=df)
+summary(EA_model2)
+
+pn <- df$physical_neglect
+PN_model1 <- lmer(heart_rate ~ (anticipation + tsst + recovery)*pn + (1|Subject_ID), data=df)
+summary(PN_model1)
+
+PN_model2 <- lmer(heart_rate ~ (anticipation + tsst + recovery)*pn*condition + (1|Subject_ID), data=df)
+summary(PN_model2)
+
+pa <- df$physical_abuse
+PA_model1 <- lmer(heart_rate ~ (anticipation + tsst + recovery)*pa + (1|Subject_ID), data=df)
+summary(PA_model1)
+
+PA_model2 <- lmer(heart_rate ~ (anticipation + tsst + recovery)*pa*condition + (1|Subject_ID), data=df)
+summary(PA_model2)
+
+sa <- df$sexual_abuse
+SA_model1 <- lmer(heart_rate ~ (anticipation + tsst + recovery)*sa + (1|Subject_ID), data=df)
+summary(SA_model1)
+
+SA_model2 <- lmer(heart_rate ~ (anticipation + tsst + recovery)*sa*condition + (1|Subject_ID), data=df)
+summary(SA_model2)
+
